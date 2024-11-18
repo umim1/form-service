@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 import sqlite3
+from urllib.parse import quote as url_quote
 
 app = Flask(__name__)
 
@@ -15,7 +16,7 @@ def home():
 @app.route('/winrate', methods=['GET'])
 def calculate_winrate():
     try:
-        # クエリパラメータを取得
+        # リクエストパラメータを取得
         params = request.args
         rule = params.get('rule')
         map_name = params.get('map')
@@ -25,7 +26,7 @@ def calculate_winrate():
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
 
-        # クエリを動的に構築
+        # クエリと動的に構築
         query = "SELECT result FROM matches WHERE 1=1"
         values = []
         if rule:
@@ -38,22 +39,31 @@ def calculate_winrate():
             query += " AND enemy_tank = ?"
             values.append(enemy_tank)
 
-        # クエリを実行して結果を取得
+        # クエリ実行
         cursor.execute(query, values)
         results = cursor.fetchall()
 
-        # 勝率を計算
-        if results:
-            total_matches = len(results)
-            wins = sum(1 for result in results if result[0] == "win")
-            winrate = (wins / total_matches) * 100
-            return jsonify({"winrate": f"{winrate:.2f}%", "total_matches": total_matches})
-        else:
-            return jsonify({"message": "該当するデータがありません"}), 404
+        # データがなければエラーメッセージを返す
+        if not results:
+            return jsonify({"message": "データがありません"}), 404
+
+        # 勝率計算
+        total_matches = len(results)
+        wins = sum(1 for result in results if result[0] == "win")
+        win_rate = (wins / total_matches) * 100
+
+        return jsonify({
+            "total_matches": total_matches,
+            "wins": wins,
+            "win_rate": win_rate
+        })
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
     finally:
         conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True)
+
