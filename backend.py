@@ -4,7 +4,7 @@ import sqlite3
 app = Flask(__name__)
 
 # データベースのパス
-DATABASE = 'game_data.db'
+DATABASE = "game_data.db"
 
 # ホームエンドポイント
 @app.route('/')
@@ -38,40 +38,22 @@ def calculate_winrate():
             query += " AND enemy_tank = ?"
             values.append(enemy_tank)
 
-        # クエリ実行
+        # クエリを実行して結果を取得
         cursor.execute(query, values)
         results = cursor.fetchall()
 
-        # 勝率計算
-        if not results:
-            return jsonify({"message": "まだデータがありません"}), 200
-
-        total_matches = len(results)
-        wins = sum(1 for result in results if result[0] == "勝ち")
-        winrate = (wins / total_matches) * 100
-
-        return jsonify({
-            "total_matches": total_matches,
-            "wins": wins,
-            "winrate": f"{winrate:.2f}%"
-        }), 200
-
+        # 勝率を計算
+        if results:
+            total_matches = len(results)
+            wins = sum(1 for result in results if result[0] == "win")
+            winrate = (wins / total_matches) * 100
+            return jsonify({"winrate": f"{winrate:.2f}%", "total_matches": total_matches})
+        else:
+            return jsonify({"message": "該当するデータがありません"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
     finally:
-        if 'conn' in locals():
-            conn.close()
+        conn.close()
 
-# アプリの起動
 if __name__ == '__main__':
     app.run(debug=True)
-<<<<<<< HEAD
-
-
-
-
-
-
-=======
->>>>>>> bdea239c490b28bc1b611aead34b20a438b7c6bf
