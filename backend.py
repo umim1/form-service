@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request
 import sqlite3
-from urllib.parse import quote as url_quote
 
 app = Flask(__name__)
 
@@ -66,4 +65,5 @@ def calculate_winrate():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
