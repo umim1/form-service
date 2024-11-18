@@ -1,61 +1,72 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 import sqlite3
 
 app = Flask(__name__)
 
-@app.route('/analyze', methods=['GET'])
-def analyze():
-    # フロントエンドから送られてきた条件を取得
-    enemy_tank = request.args.get('enemy_tank')  # 相手タンク
-    rule = request.args.get('rule')             # ルール
-    map_name = request.args.get('map')          # マップ名
+# データベースのパス
+DATABASE = 'game_data.db'
 
-    # データベース接続
-    conn = sqlite3.connect('game_data.db')
-    cursor = conn.cursor()
+# ホームエンドポイント
+@app.route('/')
+def home():
+    return "デプロイ成功！バックエンドは動作しています！"
 
-    # ベースとなるSQLクエリ
-    query = "SELECT result FROM matches WHERE 1=1"
-    params = []
+# 勝率を計算するエンドポイント
+@app.route('/winrate', methods=['GET'])
+def calculate_winrate():
+    try:
+        # クエリパラメータを取得
+        params = request.args
+        rule = params.get('rule')
+        map_name = params.get('map')
+        enemy_tank = params.get('enemy_tank')
 
-    # 条件を動的に追加
-    if enemy_tank:
-        query += " AND enemy_tank = ?"
-        params.append(enemy_tank)
-    if rule:
-        query += " AND rule = ?"
-        params.append(rule)
-    if map_name:
-        query += " AND map = ?"
-        params.append(map_name)
+        # データベース接続
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
 
-    # クエリを実行
-    cursor.execute(query, params)
-    results = cursor.fetchall()
-    conn.close()
+        # クエリを動的に構築
+        query = "SELECT result FROM matches WHERE 1=1"
+        values = []
+        if rule:
+            query += " AND rule = ?"
+            values.append(rule)
+        if map_name:
+            query += " AND map = ?"
+            values.append(map_name)
+        if enemy_tank:
+            query += " AND enemy_tank = ?"
+            values.append(enemy_tank)
 
-    # データがない場合
-    if not results:
-        return jsonify({"message": "まだデータがありません"}), 200
+        # クエリ実行
+        cursor.execute(query, values)
+        results = cursor.fetchall()
 
-    # 勝率計算
-    total_games = len(results)
-    wins = sum(1 for result in results if result[0] == '勝ち')
-    winrate = (wins / total_games) * 100
+        # 勝率計算
+        if not results:
+            return jsonify({"message": "まだデータがありません"}), 200
 
-    return jsonify({
-        "conditions": {
-            "enemy_tank": enemy_tank or "指定なし",
-            "rule": rule or "指定なし",
-            "map": map_name or "指定なし"
-        },
-        "winrate": f"{winrate:.2f}%",
-        "wins": wins,
-        "total_games": total_games
-    })
+        total_matches = len(results)
+        wins = sum(1 for result in results if result[0] == "勝ち")
+        winrate = (wins / total_matches) * 100
 
+        return jsonify({
+            "total_matches": total_matches,
+            "wins": wins,
+            "winrate": f"{winrate:.2f}%"
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+# アプリの起動
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
