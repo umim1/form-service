@@ -66,9 +66,12 @@ def calculate_winrate():
 # アプリの起動
 if __name__ == '__main__':
     app.run(debug=True)
+<<<<<<< HEAD
 
 
 
 
 
 
+=======
+>>>>>>> bdea239c490b28bc1b611aead34b20a438b7c6bf
