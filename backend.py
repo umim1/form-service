@@ -15,7 +15,7 @@ def home():
 @app.route('/winrate', methods=['GET'])
 def calculate_winrate():
     try:
-        # リクエストパラメータを取得
+        # クエリパラメータを取得
         params = request.args
         rule = params.get('rule')
         map_name = params.get('map')
@@ -25,7 +25,7 @@ def calculate_winrate():
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
 
-        # クエリと動的に構築
+        # クエリを動的に構築
         query = "SELECT result FROM matches WHERE 1=1"
         values = []
         if rule:
@@ -38,32 +38,31 @@ def calculate_winrate():
             query += " AND enemy_tank = ?"
             values.append(enemy_tank)
 
-        # クエリ実行
         cursor.execute(query, values)
         results = cursor.fetchall()
+        conn.close()
 
-        # データがなければエラーメッセージを返す
+        # 結果がない場合
         if not results:
-            return jsonify({"message": "データがありません"}), 404
+            return jsonify({"message": "データが見つかりませんでした", "winrate": None})
 
-        # 勝率計算
+        # 勝率を計算
         total_matches = len(results)
-        wins = sum(1 for result in results if result[0] == "win")
-        win_rate = (wins / total_matches) * 100
+        wins = sum(1 for result in results if result[0] == 'win')
+        winrate = (wins / total_matches) * 100
 
         return jsonify({
+            "message": "勝率計算成功！",
+            "winrate": winrate,
             "total_matches": total_matches,
-            "wins": wins,
-            "win_rate": win_rate
+            "wins": wins
         })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-    finally:
-        conn.close()
+        return jsonify({"error": str(e)})
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
