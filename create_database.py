@@ -15,7 +15,7 @@ def create_database():
             enemy_tank TEXT,
             role TEXT,
             character TEXT,
-            time_period TEXT,
+            time_of_day TEXT,  -- 修正
             result TEXT
         )
     ''')
@@ -25,3 +25,4 @@ def create_database():
 if __name__ == '__main__':
     create_database()
     print("データベースを作成しました！")
+
