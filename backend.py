@@ -1,57 +1,35 @@
 from flask import Flask, request, jsonify
-import sqlite3
 
 app = Flask(__name__)
 
-def get_db_connection():
-    conn = sqlite3.connect("game_data.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+# 仮の保存用リスト
+data_storage = []
 
-@app.route("/submit", methods=["POST"])
-def submit_data():
-    if request.is_json:
-        data = request.json
-    else:
-        data = request.form.to_dict()
+# ルートエンドポイント
+@app.route("/")
+def home():
+    return "バックエンドは正常に動作しています！"
 
-    required_fields = [
-        "game_mode",
-        "stage",
-        "team_tank",
-        "enemy_tank",
-        "role",
-        "character",
-        "time_of_day",
-        "result",
-    ]
+# データ保存用エンドポイント
+@app.route("/save", methods=["POST"])
+def save_data():
+    try:
+        # JSON形式でデータを受け取る
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
 
-    for field in required_fields:
-        if field not in data:
-            return jsonify({"error": f"Missing required field: {field}"}), 400
+        # データをリストに保存
+        data_storage.append(data)
+        return jsonify({"message": "データを保存しました！", "data": data}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        INSERT INTO matches (game_mode, stage, team_tank, enemy_tank, role, character, time_of_day, result)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            data["game_mode"],
-            data["stage"],
-            data["team_tank"],
-            data["enemy_tank"],
-            data["role"],
-            data["character"],
-            data["time_of_day"],
-            data["result"],
-        ),
-    )
-    conn.commit()
-    conn.close()
+# データ確認用エンドポイント
+@app.route("/data", methods=["GET"])
+def get_data():
+    return jsonify(data_storage), 200
 
-    return jsonify({"message": "Match data saved successfully!"}), 200
-
+# メイン関数
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000)  # ここが重要！ポートとホストを設定
