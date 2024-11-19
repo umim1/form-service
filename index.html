@@ -80,10 +80,45 @@
             }
         }
     </style>
+    <script>
+        const tankCharacters = [
+            "D.VA", "ウィンストン", "オリーサ", "ザリア", "シグマ", "ジャンカークイーン", "ドゥームフィスト",
+            "マウガ", "ラインハルト", "ラマットラ", "レッキングボール", "ロードホッグ"
+        ];
+        const dpsCharacters = [
+            "アッシュ", "ウィドウメーカー", "エコー", "キャスディ", "ゲンジ", "シンメトラ", "ジャンクラット", 
+            "ソジョーン", "ソルジャー76", "ソンブラ", "トールビョーン", "トレーサー", "ハンゾー", "バスティオン", 
+            "ファラ", "メイ", "リーパー"
+        ];
+        const supportCharacters = [
+            "アナ", "イラリー", "キリコ", "ジュノ", "ゼニヤッタ", "バティスト", "ブリギッテ", "マーシー", 
+            "モイラ", "ライフウィーバー", "ルシオ"
+        ];
+
+        const allCharacters = [...tankCharacters, ...dpsCharacters, ...supportCharacters];
+
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = ""; // 一度クリア
+            options.forEach(character => {
+                const option = document.createElement("option");
+                option.value = character;
+                option.textContent = character;
+                select.appendChild(option);
+            });
+        }
+
+        window.onload = () => {
+            // 味方タンク、敵タンク、自分のキャラすべての選択肢を全キャラにする
+            populateSelect("team_tank", allCharacters);
+            populateSelect("enemy_tank", allCharacters);
+            populateSelect("character", allCharacters);
+        };
+    </script>
 </head>
 <body>
     <h1>試合データ入力フォーム</h1>
-    <form method="POST" action="/save_data">
+    <form method="POST" action="/submit">
         <label for="game_mode">ルール:</label>
         <select name="game_mode" id="game_mode">
             <option value="コントロール">コントロール</option>
@@ -101,37 +136,16 @@
             <option value="ILIOS">ILIOS</option>
             <option value="LIJIANG TOWER">LIJIANG TOWER</option>
             <option value="NEPAL">NEPAL</option>
-            <option value="OASIS">OASIS</option>
-            <option value="SAMOA">SAMOA</option>
         </select>
 
         <label for="team_tank">味方タンク:</label>
-        <select name="team_tank" id="team_tank">
-            <option value="D.VA">D.VA</option>
-            <option value="ウィンストン">ウィンストン</option>
-            <option value="オリーサ">オリーサ</option>
-        </select>
+        <select name="team_tank" id="team_tank"></select>
 
         <label for="enemy_tank">敵タンク:</label>
-        <select name="enemy_tank" id="enemy_tank">
-            <option value="ザリア">ザリア</option>
-            <option value="シグマ">シグマ</option>
-            <option value="ジャンカークイーン">ジャンカークイーン</option>
-        </select>
-
-        <label for="role">自分のロール:</label>
-        <select name="role" id="role">
-            <option value="タンク">タンク</option>
-            <option value="DPS">DPS</option>
-            <option value="サポート">サポート</option>
-        </select>
+        <select name="enemy_tank" id="enemy_tank"></select>
 
         <label for="character">自分のキャラ:</label>
-        <select name="character" id="character">
-            <option value="D.VA">D.VA</option>
-            <option value="ザリア">ザリア</option>
-            <option value="ウィドウメーカー">ウィドウメーカー</option>
-        </select>
+        <select name="character" id="character"></select>
 
         <label for="time_of_day">時間帯:</label>
         <select name="time_of_day" id="time_of_day">
@@ -151,3 +165,4 @@
     </form>
 </body>
 </html>
+
