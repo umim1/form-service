@@ -61,16 +61,26 @@
             background: linear-gradient(to right, #FF0033, #FF6600);
             transform: scale(1.05);
         }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            label {
+                font-size: 14px;
+            }
+
+            select {
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 16px;
+            }
+        }
     </style>
     <script>
-        // 各ロールごとのキャラリスト
-        const charactersByRole = {
-            "タンク": ["D.VA", "ウィンストン", "オリーサ", "ザリア", "シグマ", "ジャンカークイーン", "ドゥームフィスト", "マウガ", "ラインハルト", "ラマットラ", "レッキングボール", "ロードホッグ"],
-            "DPS": ["アッシュ", "ウィドウメーカー", "エコー", "キャスディ", "ゲンジ", "シンメトラ", "ジャンクラット", "ソジョーン", "ソルジャー76", "ソンブラ", "トールビョーン", "トレーサー", "ハンゾー", "バスティオン", "ファラ", "メイ", "リーパー"],
-            "サポート": ["アナ", "イラリー", "キリコ", "ジュノ", "ゼニヤッタ", "バティスト", "ブリギッテ", "マーシー", "モイラ", "ライフウィーバー", "ルシオ"]
-        };
-
-        // マップごとのルール
         const mapsByRule = {
             "コントロール": ["ANTARCTIC PENINSULA", "BUSAN", "ILIOS", "LIJIANG TOWER", "NEPAL", "OASIS", "SAMOA"],
             "エスコート": ["CIRCUIT ROYAL", "DORADO", "HAVANA", "JUNKERTOWN", "RIALTO", "ROUTE 66", "SHAMBALI MONASTERY", "WATCHPOINT: GIBRALTAR"],
@@ -80,15 +90,17 @@
             "クラッシュ": ["HANAOKA", "THRONE OF ANUBIS"]
         };
 
-        // 味方タンクと敵タンクの選択肢を設定
-        const tankCharacters = charactersByRole["タンク"];
+        const charactersByRole = {
+            "タンク": ["D.VA", "ウィンストン", "オリーサ", "ザリア", "シグマ", "ジャンカークイーン", "ドゥームフィスト", "マウガ", "ラインハルト", "ラマットラ", "レッキングボール", "ロードホッグ"],
+            "DPS": ["アッシュ", "ウィドウメーカー", "エコー", "キャスディ", "ゲンジ", "シンメトラ", "ジャンクラット", "ソジョーン", "ソルジャー76", "ソンブラ", "トールビョーン", "トレーサー", "ハンゾー", "バスティオン", "ファラ", "メイ", "リーパー"],
+            "サポート": ["アナ", "イラリー", "キリコ", "ジュノ", "ゼニヤッタ", "バティスト", "ブリギッテ", "マーシー", "モイラ", "ライフウィーバー", "ルシオ"]
+        };
 
         function updateMaps() {
             const ruleSelect = document.getElementById("game_mode");
             const mapSelect = document.getElementById("stage");
             const selectedRule = ruleSelect.value;
 
-            // マップ選択肢をクリアして更新
             mapSelect.innerHTML = "";
 
             mapsByRule[selectedRule].forEach(map => {
@@ -106,7 +118,7 @@
             teamTankSelect.innerHTML = "";
             enemyTankSelect.innerHTML = "";
 
-            tankCharacters.forEach(character => {
+            charactersByRole["タンク"].forEach(character => {
                 const teamOption = document.createElement("option");
                 teamOption.value = character;
                 teamOption.textContent = character;
@@ -162,7 +174,7 @@
         <label for="enemy_tank">敵タンク:</label>
         <select name="enemy_tank" id="enemy_tank"></select>
 
-        <label for="role">ロール:</label>
+        <label for="role">自分のロール:</label>
         <select name="role" id="role" onchange="updateCharacterOptions()">
             <option value="タンク">タンク</option>
             <option value="DPS">DPS</option>
