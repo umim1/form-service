@@ -34,7 +34,7 @@
             margin: 15px 0 8px;
         }
 
-        select {
+        select, button {
             width: 100%;
             padding: 10px;
             font-size: 16px;
@@ -44,40 +44,13 @@
         }
 
         button {
-            width: 100%;
-            padding: 12px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #fff;
             background: linear-gradient(to right, #FF6600, #FF0033);
-            border: none;
-            border-radius: 5px;
+            color: #fff;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transition: background 0.3s ease, transform 0.2s ease;
         }
 
         button:hover {
             background: linear-gradient(to right, #FF0033, #FF6600);
-            transform: scale(1.05);
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 20px;
-            }
-
-            label {
-                font-size: 14px;
-            }
-
-            select {
-                font-size: 14px;
-            }
-
-            button {
-                font-size: 16px;
-            }
         }
     </style>
     <script>
@@ -155,7 +128,7 @@
 </head>
 <body>
     <h1>試合データ入力フォーム</h1>
-    <form method="POST" action="https://backend-service-0j88.onrender.com">
+    <form method="POST" action="https://backend-service-0j88.onrender.com/save">
         <label for="game_mode">ルール:</label>
         <select name="game_mode" id="game_mode" onchange="updateMaps()">
             <option value="コントロール">コントロール</option>
@@ -203,6 +176,8 @@
     </form>
 </body>
 </html>
+
+
 
 
 

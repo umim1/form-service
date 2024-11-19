@@ -1,35 +1,55 @@
 from flask import Flask, request, jsonify
+import sqlite3
 
 app = Flask(__name__)
 
-# 仮の保存用リスト
-data_storage = []
+# データベースの初期化
+def init_db():
+    connection = sqlite3.connect('game_data.db')
+    cursor = connection.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS game_data (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            game_mode TEXT,
+            stage TEXT,
+            team_tank TEXT,
+            enemy_tank TEXT,
+            role TEXT,
+            character TEXT,
+            time_of_day TEXT,
+            result TEXT
+        )
+    ''')
+    connection.commit()
+    connection.close()
 
-# ルートエンドポイント
-@app.route("/")
-def home():
-    return "バックエンドは正常に動作しています！"
-
-# データ保存用エンドポイント
-@app.route("/save", methods=["POST"])
+@app.route('/save', methods=['POST'])
 def save_data():
-    try:
-        # JSON形式でデータを受け取る
-        data = request.get_json()
-        if not data:
-            return jsonify({"error": "No data provided"}), 400
+    data = request.form
+    game_mode = data.get('game_mode')
+    stage = data.get('stage')
+    team_tank = data.get('team_tank')
+    enemy_tank = data.get('enemy_tank')
+    role = data.get('role')
+    character = data.get('character')
+    time_of_day = data.get('time_of_day')
+    result = data.get('result')
 
-        # データをリストに保存
-        data_storage.append(data)
-        return jsonify({"message": "データを保存しました！", "data": data}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    if not all([game_mode, stage, team_tank, enemy_tank, role, character, time_of_day, result]):
+        return jsonify({'error': 'Missing data'}), 400
 
-# データ確認用エンドポイント
-@app.route("/data", methods=["GET"])
-def get_data():
-    return jsonify(data_storage), 200
+    connection = sqlite3.connect('game_data.db')
+    cursor = connection.cursor()
+    cursor.execute('''
+        INSERT INTO game_data (game_mode, stage, team_tank, enemy_tank, role, character, time_of_day, result)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (game_mode, stage, team_tank, enemy_tank, role, character, time_of_day, result))
+    connection.commit()
+    connection.close()
 
-# メイン関数
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)  # ここが重要！ポートとホストを設定
+    return jsonify({'message': 'Data saved successfully'}), 200
+
+if __name__ == '__main__':
+    init_db()
+    app.run(debug=True)
+
