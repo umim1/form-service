@@ -61,58 +61,82 @@
             background: linear-gradient(to right, #FF0033, #FF6600);
             transform: scale(1.05);
         }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 20px;
-            }
-
-            label {
-                font-size: 14px;
-            }
-
-            select {
-                font-size: 14px;
-            }
-
-            button {
-                font-size: 16px;
-            }
-        }
     </style>
     <script>
-        const tankCharacters = [
-            "D.VA", "ウィンストン", "オリーサ", "ザリア", "シグマ", "ジャンカークイーン", "ドゥームフィスト",
-            "マウガ", "ラインハルト", "ラマットラ", "レッキングボール", "ロードホッグ"
-        ];
-        const dpsCharacters = [
-            "アッシュ", "ウィドウメーカー", "エコー", "キャスディ", "ゲンジ", "シンメトラ", "ジャンクラット", 
-            "ソジョーン", "ソルジャー76", "ソンブラ", "トールビョーン", "トレーサー", "ハンゾー", "バスティオン", 
-            "ファラ", "メイ", "リーパー"
-        ];
-        const supportCharacters = [
-            "アナ", "イラリー", "キリコ", "ジュノ", "ゼニヤッタ", "バティスト", "ブリギッテ", "マーシー", 
-            "モイラ", "ライフウィーバー", "ルシオ"
-        ];
+        // 各ロールごとのキャラリスト
+        const charactersByRole = {
+            "タンク": ["D.VA", "ウィンストン", "オリーサ", "ザリア", "シグマ", "ジャンカークイーン", "ドゥームフィスト", "マウガ", "ラインハルト", "ラマットラ", "レッキングボール", "ロードホッグ"],
+            "DPS": ["アッシュ", "ウィドウメーカー", "エコー", "キャスディ", "ゲンジ", "シンメトラ", "ジャンクラット", "ソジョーン", "ソルジャー76", "ソンブラ", "トールビョーン", "トレーサー", "ハンゾー", "バスティオン", "ファラ", "メイ", "リーパー"],
+            "サポート": ["アナ", "イラリー", "キリコ", "ジュノ", "ゼニヤッタ", "バティスト", "ブリギッテ", "マーシー", "モイラ", "ライフウィーバー", "ルシオ"]
+        };
 
-        const allCharacters = [...tankCharacters, ...dpsCharacters, ...supportCharacters];
+        // マップごとのルール
+        const mapsByRule = {
+            "コントロール": ["ANTARCTIC PENINSULA", "BUSAN", "ILIOS", "LIJIANG TOWER", "NEPAL", "OASIS", "SAMOA"],
+            "エスコート": ["CIRCUIT ROYAL", "DORADO", "HAVANA", "JUNKERTOWN", "RIALTO", "ROUTE 66", "SHAMBALI MONASTERY", "WATCHPOINT: GIBRALTAR"],
+            "ハイブリッド": ["BLIZZARD WORLD", "EICHENWALDE", "HOLLYWOOD", "KING'S ROW", "MIDTOWN", "NUMBANI", "PARAISO"],
+            "プッシュ": ["COLOSSEO", "NEW QUEEN STREET", "ESPERANCA", "RUNASAPI"],
+            "フラッシュポイント": ["NEW JUNK CITY", "SURAVASA"],
+            "クラッシュ": ["HANAOKA", "THRONE OF ANUBIS"]
+        };
 
-        function populateSelect(selectId, options) {
-            const select = document.getElementById(selectId);
-            select.innerHTML = ""; // 一度クリア
-            options.forEach(character => {
+        // 味方タンクと敵タンクの選択肢を設定
+        const tankCharacters = charactersByRole["タンク"];
+
+        function updateMaps() {
+            const ruleSelect = document.getElementById("game_mode");
+            const mapSelect = document.getElementById("stage");
+            const selectedRule = ruleSelect.value;
+
+            // マップ選択肢をクリアして更新
+            mapSelect.innerHTML = "";
+
+            mapsByRule[selectedRule].forEach(map => {
+                const option = document.createElement("option");
+                option.value = map;
+                option.textContent = map;
+                mapSelect.appendChild(option);
+            });
+        }
+
+        function populateTankSelects() {
+            const teamTankSelect = document.getElementById("team_tank");
+            const enemyTankSelect = document.getElementById("enemy_tank");
+
+            teamTankSelect.innerHTML = "";
+            enemyTankSelect.innerHTML = "";
+
+            tankCharacters.forEach(character => {
+                const teamOption = document.createElement("option");
+                teamOption.value = character;
+                teamOption.textContent = character;
+                teamTankSelect.appendChild(teamOption);
+
+                const enemyOption = document.createElement("option");
+                enemyOption.value = character;
+                enemyOption.textContent = character;
+                enemyTankSelect.appendChild(enemyOption);
+            });
+        }
+
+        function updateCharacterOptions() {
+            const roleSelect = document.getElementById("role");
+            const characterSelect = document.getElementById("character");
+            const selectedRole = roleSelect.value;
+
+            characterSelect.innerHTML = "";
+
+            charactersByRole[selectedRole].forEach(character => {
                 const option = document.createElement("option");
                 option.value = character;
                 option.textContent = character;
-                select.appendChild(option);
+                characterSelect.appendChild(option);
             });
         }
 
         window.onload = () => {
-            // 味方タンク、敵タンク、自分のキャラすべての選択肢を全キャラにする
-            populateSelect("team_tank", allCharacters);
-            populateSelect("enemy_tank", allCharacters);
-            populateSelect("character", allCharacters);
+            updateMaps();
+            populateTankSelects();
         };
     </script>
 </head>
@@ -120,7 +144,7 @@
     <h1>試合データ入力フォーム</h1>
     <form method="POST" action="/submit">
         <label for="game_mode">ルール:</label>
-        <select name="game_mode" id="game_mode">
+        <select name="game_mode" id="game_mode" onchange="updateMaps()">
             <option value="コントロール">コントロール</option>
             <option value="エスコート">エスコート</option>
             <option value="ハイブリッド">ハイブリッド</option>
@@ -130,19 +154,20 @@
         </select>
 
         <label for="stage">マップ:</label>
-        <select name="stage" id="stage">
-            <option value="ANTARCTIC PENINSULA">ANTARCTIC PENINSULA</option>
-            <option value="BUSAN">BUSAN</option>
-            <option value="ILIOS">ILIOS</option>
-            <option value="LIJIANG TOWER">LIJIANG TOWER</option>
-            <option value="NEPAL">NEPAL</option>
-        </select>
+        <select name="stage" id="stage"></select>
 
         <label for="team_tank">味方タンク:</label>
         <select name="team_tank" id="team_tank"></select>
 
         <label for="enemy_tank">敵タンク:</label>
         <select name="enemy_tank" id="enemy_tank"></select>
+
+        <label for="role">ロール:</label>
+        <select name="role" id="role" onchange="updateCharacterOptions()">
+            <option value="タンク">タンク</option>
+            <option value="DPS">DPS</option>
+            <option value="サポート">サポート</option>
+        </select>
 
         <label for="character">自分のキャラ:</label>
         <select name="character" id="character"></select>
@@ -165,5 +190,7 @@
     </form>
 </body>
 </html>
+
+
 
 
