@@ -1,38 +1,22 @@
+import os
 from flask import Flask, request, jsonify
-import sqlite3
 
 app = Flask(__name__)
 
-# データベース名
-DATABASE = "game_data.db"
-
+# 保存処理を行うエンドポイント
 @app.route('/save_data', methods=['POST'])
 def save_data():
-    data = request.json  # フロントエンドからのJSONデータを受け取る
-
-    # 必要なデータを取得
-    rule = data.get("rule")
-    map_name = data.get("map_name")
-    ally_tank = data.get("ally_tank")
-    enemy_tank = data.get("enemy_tank")
-    role = data.get("role")
-    character = data.get("character")
-    time_period = data.get("time_period")
-    result = data.get("result")
-
-    # データベースに保存
-    try:
-        conn = sqlite3.connect(DATABASE)
-        cursor = conn.cursor()
-        cursor.execute("""
-        INSERT INTO matches (rule, map_name, ally_tank, enemy_tank, role, character, time_period, result)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (rule, map_name, ally_tank, enemy_tank, role, character, time_period, result))
-        conn.commit()
-        conn.close()
-        return jsonify({"message": "データを保存しました！"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    # フォームから送信されたデータを取得
+    data = request.form.to_dict()
+    
+    # データを仮に出力（実際にはデータベース保存などの処理を記述）
+    print("受信データ:", data)
+    
+    # レスポンスを返す
+    return jsonify({"message": "データが保存されました！", "data": data})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # 環境変数からポートを取得し、指定がなければデフォルトで5000番を使用
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
+
